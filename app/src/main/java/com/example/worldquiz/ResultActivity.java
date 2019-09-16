@@ -36,16 +36,29 @@ public class ResultActivity extends AppCompatActivity {
         int trueAnswer = Integer.parseInt(getIntent().getStringExtra("trueAnswer"));
         int falseAnswer = Integer.parseInt(getIntent().getStringExtra("falseAnswer"));
         int point = trueAnswer*5 - falseAnswer*2;
-        String result = "Well done "+ getIntent().getStringExtra("nickname") +", you have "+ trueAnswer +" correct answers and " +
-                falseAnswer+" incorrect answers or "+ point +" points in this attempt";
-        result1.setText(result);
+        if(point <0) {
+            point =0;
+            String result = "Well done " + getIntent().getStringExtra("nickname") + ", you have " +
+                    trueAnswer + " correct answers and " +
+                    falseAnswer + " incorrect answers or " + point + " points in this attempt";
+            result1.setText(result);
+            String aresult = "Overall in this session, you have " + point + " points";
+            result2.setText(aresult);
+        }else{
+            String result = "Well done " + getIntent().getStringExtra("nickname") + ", you have " +
+                    trueAnswer + " correct answers and " +
+                    falseAnswer + " incorrect answers or " + point + " points in this attempt";
+            result1.setText(result);
+            String aresult = "Overall in this session, you have " + point + " points";
+            result2.setText(aresult);
+        }
+        finishButton.setOnClickListener(clickListener);
+        exitButton.setOnClickListener(clickListener);
+
+
         //SessionDatabase sessiondb = new SessionDatabase(this);
         //Cursor res = sessiondb.getSession(1);
         //res.moveToFirst();
-        String aresult = "Overall in this session, you have " + point +" points";
-        result2.setText(aresult);
-        finishButton.setOnClickListener(clickListener);
-        exitButton.setOnClickListener(clickListener);
     }
     public final View.OnClickListener clickListener = new View.OnClickListener(){
         @Override
