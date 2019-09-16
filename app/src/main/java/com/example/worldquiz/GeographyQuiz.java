@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.Locale;
 import java.util.Random;
 
 public class GeographyQuiz extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
@@ -37,7 +38,8 @@ public class GeographyQuiz extends AppCompatActivity implements NavigationView.O
     ArrayList<GeoraphyClass> theList;
     int trueAnswer =0;
     int falseAnswer =0;
-    int number =1;
+    int number =0;
+    int[] myList = new int[10];
     private final Random random = new Random();
     private final int range = 19;
     private int previous;
@@ -47,7 +49,7 @@ public class GeographyQuiz extends AppCompatActivity implements NavigationView.O
         setContentView(R.layout.activity_geography_quiz);
 
         sessiondb = new SessionDatabase(this);
-        DateFormat df = new SimpleDateFormat("dd/MM/yy HH:mm:ss");
+        DateFormat df = new SimpleDateFormat("dd/MM/yy HH:mm:ss", Locale.ROOT);
         Date dateobj = new Date();
         String time = df.format(dateobj);
         String nickname = getIntent().getStringExtra("NICKNAME");
@@ -83,9 +85,11 @@ public class GeographyQuiz extends AppCompatActivity implements NavigationView.O
             }
         }
 
-        questionNumber.setText("Question 1:");
-        questionContent.setText(theList.get(nextRnd()).getQuestion());
-
+        String kobiet = "Question 1:";
+        questionNumber.setText(kobiet);
+        int rand = nextRnd();
+        questionContent.setText(theList.get(rand).getQuestion());
+        myList[0] = rand;
         nextQuestion.setOnClickListener(clickListener);
     }
     @Override
@@ -116,21 +120,28 @@ public class GeographyQuiz extends AppCompatActivity implements NavigationView.O
     };
     public void nextQuestion(){
         ++number;
-        if(number == 11){
-
+        if(number == 10){
+            if(answer.getText().toString().toLowerCase().trim().equals(theList.get(myList[number-1]).getAnswer().toLowerCase().trim())){
+                ++trueAnswer;
+            }else{falseAnswer++;}
+            answer.setText("");
             Intent result = new Intent(GeographyQuiz.this,ResultActivity.class);
             result.putExtra("trueAnswer",Integer.toString(trueAnswer));
             result.putExtra("falseAnswer",Integer.toString(falseAnswer));
             result.putExtra("nickname",getIntent().getStringExtra("NICKNAME"));
             startActivity(result);
         }
-        if(number <= 10) {
+        if(number <= 9) {
             int rand = nextRnd();
-            questionNumber.setText("Question " + number + ":");
+            myList[number]=rand;
+            String ques="Question " + (number+ 1)+ ":";
+            questionNumber.setText(ques);
             questionContent.setText(theList.get(rand).getQuestion());
-            if(answer.getText().toString() == theList.get(rand).getAnswer()){
+//            showMessage("The answer is",theList.get(myList[number-1]).getAnswer().toLowerCase().trim() );
+//            showMessage("Your answer is ",answer.getText().toString().toLowerCase().trim() );
+            if(answer.getText().toString().toLowerCase().trim().equals(theList.get(myList[number-1]).getAnswer().toLowerCase().trim())){
                 ++trueAnswer;
-            }else{++falseAnswer;}
+            }else{falseAnswer++;}
             answer.setText("");
         }
     }
@@ -141,18 +152,16 @@ public class GeographyQuiz extends AppCompatActivity implements NavigationView.O
             Cursor res = sessiondb.viewAllSession();
             if (res.getCount() == 0) {
                 showMessage("Points earned", "No session found");
-                return;
             }else {
                 while(res.moveToNext()) {
                     Session session = new Session(res.getString(1), res.getString(2), res.getString(3));
                     listOfSessions.add(session);
                 }
                 int points = Integer.parseInt(listOfSessions.get(listOfSessions.size()-1).getPoints());
-                String sessionDate = "Concac";
+                String sessionDate;
                 String firstMsg = "Hi " + nickname + ", You have earned " + points + " in the following Sessions";
                 String secondMsg ="";
                 for(int i=0; i<=listOfSessions.size(); i++) {
-                    sessionDate = listOfSessions.get(i).getDate();
                     points = Integer.parseInt(listOfSessions.get(i).getPoints());
                     sessionDate = listOfSessions.get(i).getDate();
                     secondMsg = "Session started on " + sessionDate + "-- points earned " + points+'\n';
